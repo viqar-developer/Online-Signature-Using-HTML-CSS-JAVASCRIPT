@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Signature Creator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            background-color: #1e2b3a;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .menu-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            z-index: 1;
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .dropdown a:hover {
+            background-color: #f0f0f0;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: navy;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+            color: navy;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input[type="color"] {
+            width: 40px;
+            height: 40px;
+            border: none;
+            padding: 0;
+        }
+
+        .preview {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .preview-text {
+            font-size: 2rem;
+        }
+
+        .footer {
+            margin-top: 20px;
+            background-color: navy;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>E-Signature</h1>
+        <div class="menu-icon" id="menu-icon">☰</div>
+        <div class="dropdown" id="dropdown-menu">
+            <a href="index.html">Home</a>
+            <a href="signature-generator.html">Signature Generator</a>
+            <a href="Draw signature.html">Draw Signature</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Create Your Custom eSignature</h2>
+        <p>Design a custom signature using your own font style and color.</p>
+
+        <input
+            type="text"
+            id="signatureInput"
+            placeholder="Type your signature here"
+        />
+
+        <div>
+            <label for="fontStyle">Choose Font Style:</label>
+            <select id="fontStyle">
+                <option>Dancing Script</option>
+                <option>Arial</option>
+                <option>Times New Roman</option>
+                <option>Georgia</option>
+                <option>Courier New</option>
+                <option>Verdana</option>
+                <option>Tahoma</option>
+                <option>Trebuchet MS</option>
+                <option>Impact</option>
+                <option>Lucida Console</option>
+                <option>Comic Sans MS</option>
+                <option>Brush Script MT</option>
+                <option>Palatino Linotype</option>
+                <option>Segoe UI</option>
+                <option>Arial Black</option>
+                <option>Garamond</option>
+                <option>Frank Ruhl Libre</option>
+                <option>Miriam Libre</option>
+                <option>Rockwell</option>
+                <option>Montserrat</option>
+                <option>Oswald</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="signatureSize">Choose Signature Size:</label>
+            <select id="signatureSize">
+                <option>Small</option>
+                <option>Medium</option>
+                <option>Large</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="slope">Slope Signature:</label>
+            <select id="slope">
+                <option>Straight</option>
+                <option>Slanted</option>
+                <option>Left</option>
+                <option>Right</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Pick Signature Color:</label>
+            <input type="color" id="colorPicker" value="#000000" />
+        </div>
+
+        <div class="preview">
+            <p>Preview:</p>
+            <p id="signaturePreview" class="preview-text">Your Signature</p>
+        </div>
+
+        <div class="footer">
+            <h3>Sign Documents Securely Online for Free</h3>
+            <p>The #1 eSignature Solution For Your Business | © 2024 E-Signature All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        // Dropdown menu functionality
+        const menuIcon = document.getElementById('menu-icon');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+
+        menuIcon.addEventListener('click', function() {
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close dropdown if clicked outside
+        window.addEventListener('click', function(event) {
+            if (!menuIcon.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.style.display = 'none';
+            }
+        });
+
+        // Signature preview functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const signatureInput = document.getElementById('signatureInput');
+            const fontStyleSelect = document.getElementById('fontStyle');
+            const signatureSizeSelect = document.getElementById('signatureSize');
+            const slopeSelect = document.getElementById('slope');
+            const colorPicker = document.getElementById('colorPicker');
+            const signaturePreview = document.getElementById('signaturePreview');
+
+            const updatePreview = () => {
+                const signature = signatureInput.value;
+                const fontStyle = fontStyleSelect.value;
+                const signatureSize = signatureSizeSelect.value;
+                const slope = slopeSelect.value;
+                const color = colorPicker.value;
+
+                signaturePreview.textContent = signature || 'Your Signature';
+                signaturePreview.style.fontFamily = fontStyle;
+                signaturePreview.style.fontSize = signatureSize === 'Small' ? '1.5rem' :
+                    signatureSize === 'Large' ? '2.5rem' : '2rem';
+                signaturePreview.style.transform = slope === 'Left' ? 'skew(-10deg)' :
+                    slope === 'Right' ? 'skew(10deg)' : slope === 'Slanted' ? 'skew(-10deg)' : 'none';
+                signaturePreview.style.color = color;
+            };
+
+            signatureInput.addEventListener('input', updatePreview);
+            fontStyleSelect.addEventListener('change', updatePreview);
+            signatureSizeSelect.addEventListener('change', updatePreview);
+            slopeSelect.addEventListener('change', updatePreview);
+            colorPicker.addEventListener('input', updatePreview);
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+

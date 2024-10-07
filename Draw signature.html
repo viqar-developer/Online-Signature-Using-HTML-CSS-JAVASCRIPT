@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw Your Signature</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        header {
+            background-color: #1e2b3a;
+            color: white;
+            padding: 10px 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        h1 {
+            text-align: center;
+            color: navy;
+        }
+        p {
+            text-align: center;
+            color: #666;
+        }
+        #canvas {
+            border: 1px solid #ddd;
+            display: block;
+            margin: 20px auto;
+        }
+        .color-picker {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin: 0 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .color-option.selected {
+            border-color: #333;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #saveBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #clearBtn {
+            background-color: #f44336;
+            color: white;
+        }
+        .footer {
+            margin-top: 20px;
+            background-color: navy;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #saveMessage {
+            text-align: center;
+            color: #4CAF50;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        .menu-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            z-index: 1;
+        }
+        .dropdown a {
+            display: block;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+        }
+        .dropdown a:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Draw Your Signature</h1>
+        <div class="menu-icon" id="menu-icon">☰</div>
+        <div class="dropdown" id="dropdown-menu">
+            <a href="index.html">Home</a>
+            <a href="signature-generator.html">Signature Generator</a>
+            <a href="Draw signature.html">Draw Signature</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <p>Use the canvas below to draw your signature.</p>
+        <canvas id="canvas" width="400" height="200"></canvas>
+        <div class="color-picker">
+            <div class="color-option selected" style="background-color: black;" data-color="black"></div>
+            <div class="color-option" style="background-color: red;" data-color="red"></div>
+            <div class="color-option" style="background-color: lime;" data-color="lime"></div>
+            <div class="color-option" style="background-color: blue;" data-color="blue"></div>
+            <div class="color-option" style="background-color: yellow;" data-color="yellow"></div>
+            <div class="color-option" style="background-color: magenta;" data-color="magenta"></div>
+            <div class="color-option" style="background-color: cyan;" data-color="cyan"></div>
+        </div>
+        <div class="buttons">
+            <button id="saveBtn">Save as PNG</button>
+            <button id="clearBtn">Clear</button>
+        </div>
+        <div id="saveMessage"></div>
+        <div class="footer">
+            <p>Sign Documents Securely Online for Free</p>
+            <p>The #1 eSignature Solution For Your Business | © 2024 E-Signature All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        const menuIcon = document.getElementById('menu-icon');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+
+        menuIcon.addEventListener('click', function() {
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close dropdown if clicked outside
+        window.addEventListener('click', function(event) {
+            if (!menuIcon.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.style.display = 'none';
+            }
+        });
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let currentColor = 'black';
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                currentColor = this.dataset.color;
+                document.querySelector('.color-option.selected').classList.remove('selected');
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', clearCanvas);
+        document.getElementById('saveBtn').addEventListener('click', saveSignature);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = currentColor;
+
+            if (e.type === 'mousemove') {
+                ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+            } else if (e.type === 'touchmove') {
+                ctx.lineTo(e.touches[0].clientX - canvas.offsetLeft, e.touches[0].clientY - canvas.offsetTop);
+            }
+            
+            ctx.stroke();
+            ctx.beginPath();
+            
+            if (e.type === 'mousemove') {
+                ctx.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+            } else if (e.type === 'touchmove') {
+                ctx.moveTo(e.touches[0].clientX - canvas.offsetLeft, e.touches[0].clientY - canvas.offsetTop);
+            }
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function saveSignature() {
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'signature.png';
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            const saveMessage = document.getElementById('saveMessage');
+            saveMessage.textContent = 'Signature saved as PNG. Check your downloads folder.';
+            saveMessage.style.display = 'block';
+
+            setTimeout(() => {
+                saveMessage.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
